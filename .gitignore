@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Electron
+dist/
+
+# Data (4.7MB game database — keep in repo)
+# data/offline_db.json  # intentionally tracked
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak_*
+
+# Temp files
+*.tmp
+*.swp
+*~

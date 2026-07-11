@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Last Epoch Save Editor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ═══ HEADER ═══════════════════════════════════════════════════════════ -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="brand-logo">⚔</div>
+        <div class="brand-text">
+          <div class="brand-title">LAST EPOCH</div>
+          <div class="brand-sub">Save Editor</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="saveDirInfo" class="save-dir-info muted">—</span>
+        <button id="btnBackupAll" class="btn btn-warn btn-sm">📦 Backup All</button>
+        <span id="connStatus" class="conn-pill conn-connecting">
+          <span class="conn-dot"></span>
+          <span class="conn-text">Connecting…</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- ═══ ERROR BANNER ═════════════════════════════════════════════════════ -->
+    <div id="errorBanner" class="error-banner hidden"></div>
+
+    <!-- ═══ MAIN LAYOUT ══════════════════════════════════════════════════════ -->
+    <div class="layout">
+
+      <!-- ── SIDEBAR ───────────────────────────────────────────────────────── -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-title">CHARACTERS</div>
+          <button id="btnRefreshChars" class="icon-btn" title="Refresh">↻</button>
+        </div>
+        <div id="charList" class="char-list">
+          <div class="sidebar-loading">
+            <div class="spinner"></div>
+            <span>Loading characters…</span>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <button id="btnStash" class="btn btn-secondary btn-block">
+            <span class="btn-icon">🗄</span> Stash
+          </button>
+        </div>
+      </aside>
+
+      <!-- ── MAIN CONTENT ─────────────────────────────────────────────────── -->
+      <main class="main">
+
+        <!-- Welcome view -->
+        <div id="welcomeView" class="content-view">
+          <div class="welcome-hero">
+            <div class="welcome-emblem">⚔</div>
+            <h1 class="welcome-title">Last Epoch Save Editor</h1>
+            <p class="welcome-sub">Select a character from the sidebar to begin editing.</p>
+          </div>
+          <div class="welcome-cards">
+            <div class="welcome-card">
+              <div class="welcome-card-icon">⚠</div>
+              <div class="welcome-card-body">
+                <div class="welcome-card-title">Close the Game First</div>
+                <div class="welcome-card-text">Make sure Last Epoch is fully closed before editing saves to avoid corruption or overwritten changes.</div>
+              </div>
+            </div>
+            <div class="welcome-card">
+              <div class="welcome-card-icon">💾</div>
+              <div class="welcome-card-body">
+                <div class="welcome-card-title">Automatic Backups</div>
+                <div class="welcome-card-text">Every edit creates a backup. Restore from <code>*.bak_*</code> files in your Saves directory, or use Backup All for a full snapshot.</div>
+              </div>
+            </div>
+            <div class="welcome-card">
+              <div class="welcome-card-icon">🔧</div>
+              <div class="welcome-card-body">
+                <div class="welcome-card-title">Full Item Control</div>
+                <div class="welcome-card-text">Edit affixes, forging potential, legendary potential, and rolls. Add new items from the built-in database.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Character view -->
+        <div id="charView" class="content-view hidden">
+          <!-- Tab bar -->
+          <div class="tabbar">
+            <button class="tab active" data-tab="overview"><span class="tab-icon">📊</span> Overview</button>
+            <button class="tab" data-tab="edit"><span class="tab-icon">✏</span> Edit</button>
+            <button class="tab" data-tab="items"><span class="tab-icon">⚔</span> Items</button>
+            <button class="tab" data-tab="add"><span class="tab-icon">➕</span> Add Item</button>
+          </div>
+
+          <!-- Overview tab -->
+          <div id="tab-overview" class="tab-panel active">
+            <div id="charOverview"></div>
+          </div>
+
+          <!-- Edit tab -->
+          <div id="tab-edit" class="tab-panel hidden">
+            <div id="charEditForm"></div>
+          </div>
+
+          <!-- Items tab — split grid + detail -->
+          <div id="tab-items" class="tab-panel hidden">
+            <div class="items-split">
+              <div class="items-grid-wrap">
+                <div class="items-grid-header">
+                  <span class="items-grid-title">Equipped &amp; Inventory</span>
+                  <span id="itemsGridCount" class="items-grid-count muted">0 items</span>
+                </div>
+                <div id="itemsGrid" class="items-grid"></div>
+              </div>
+              <div id="itemDetail" class="item-detail-panel">
+                <div class="item-detail-empty">
+                  <div class="item-detail-empty-icon">⚔</div>
+                  <p>Select an item to view details</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Item tab -->
+          <div id="tab-add" class="tab-panel hidden">
+            <div id="addItemForm"></div>
+          </div>
+        </div>
+
+        <!-- Stash view -->
+        <div id="stashView" class="content-view hidden">
+          <div class="tabbar">
+            <button class="tab active" data-tab="stashOverview"><span class="tab-icon">📊</span> Overview</button>
+            <button class="tab" data-tab="stashEdit"><span class="tab-icon">✏</span> Edit</button>
+            <button class="tab" data-tab="stashKeys"><span class="tab-icon">🗝</span> Keys</button>
+          </div>
+          <div id="tab-stashOverview" class="tab-panel active">
+            <div id="stashOverview"></div>
+          </div>
+          <div id="tab-stashEdit" class="tab-panel hidden">
+            <div id="stashEditForm"></div>
+          </div>
+          <div id="tab-stashKeys" class="tab-panel hidden">
+            <div id="stashKeysPanel"></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
