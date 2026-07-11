@@ -1,14 +1,13 @@
 #!/bin/bash
-# Last Epoch Save Editor — portable launcher
-# Auto-detects: project dir, system Electron, save directory
+# Last Epoch Save Editor — portable launcher (no Python needed)
+# The entire app is now Node.js/Electron — no Python venv required
 
 set -e
 
-# Find project directory (this script lives in it)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Find system Electron (check common Arch/Debian paths)
+# Find system Electron
 ELECTRON_BIN=""
 for e in /usr/lib/electron*/electron /usr/bin/electron /usr/lib/node_modules/electron/dist/electron; do
   if [ -x "$e" ]; then
@@ -16,13 +15,6 @@ for e in /usr/lib/electron*/electron /usr/bin/electron /usr/lib/node_modules/ele
     break
   fi
 done
-
-# Ensure Python venv exists
-if [ ! -d ".venv" ]; then
-  echo "Creating Python venv..."
-  python3 -m venv .venv
-  .venv/bin/pip install flask
-fi
 
 # Pass save dir override if set
 export LE_SAVE_DIR="${LE_SAVE_DIR:-}"

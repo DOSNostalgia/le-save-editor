@@ -24,11 +24,10 @@ const path = require("path");
 const http = require("http");
 
 let mainWindow = null;
-let pythonProcess = null;
-let pythonExited = false;
+let serverProcess = null;
+let serverExited = false;
 const SERVER_URL = "http://127.0.0.1:17345";
-const PYTHON_VENV = path.join(__dirname, ".venv", "bin", "python");
-const SERVER_SCRIPT = path.join(__dirname, "server.py");
+const SERVER_SCRIPT = path.join(__dirname, "server.js");
 
 function waitForServer(callback, retries = 30) {
   const check = () => {
@@ -97,24 +96,24 @@ app.whenReady().then(() => {
     }
   });
 
-  // Start Python backend
-  const pythonPath = require("fs").existsSync(PYTHON_VENV) ? PYTHON_VENV : "python3";
-  pythonProcess = spawn(pythonPath, [SERVER_SCRIPT], {
+  // Start Node backend
+  serverProcess = spawn(process.execPath, [SERVER_SCRIPT], {
     cwd: __dirname,
     stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env },
   });
 
-  pythonProcess.stderr.on("data", (data) => {
-    console.error(`[python] ${data}`);
+  serverProcess.stderr.on("data", (data) => {
+    console.error(`[server] ${data}`);
   });
 
-  pythonProcess.on("exit", (code) => {
-    console.log(`Python server exited with code ${code}`);
-    pythonExited = true;
+  serverProcess.on("exit", (code) => {
+    console.log(`Server process exited with code ${code}`);
+    serverExited = true;
   });
 
   // Consume stdout to prevent pipe buffer deadlock
-  pythonProcess.stdout.on("data", () => {});
+  serverProcess.stdout.on("data", () => {});
 
   // Wait for server, then create window
   waitForServer((err, health) => {
@@ -127,16 +126,16 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (pythonProcess) {
-    pythonProcess.kill();
-    pythonProcess = null;
+  if (serverProcess) {
+    serverProcess.kill();
+    serverProcess = null;
   }
   app.quit();
 });
 
 app.on("before-quit", () => {
-  if (pythonProcess) {
-    pythonProcess.kill();
-    pythonProcess = null;
+  if (serverProcess) {
+    serverProcess.kill();
+    serverProcess = null;
   }
 });

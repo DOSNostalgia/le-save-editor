@@ -1,13 +1,52 @@
 {
   "name": "le-save-editor",
   "version": "1.0.0",
-  "description": "Last Epoch Save Editor — desktop GUI",
+  "description": "Last Epoch Save Editor — edit offline save files",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --dev"
+    "dev": "electron . --dev",
+    "server": "node server.js",
+    "build": "electron-builder --linux AppImage",
+    "build:all": "electron-builder --linux AppImage --x64 --arm64"
+  },
+  "build": {
+    "appId": "com.le.save-editor",
+    "productName": "Last Epoch Save Editor",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "preload.js",
+      "itemCodec.js",
+      "renderer/**/*",
+      "data/offline_db.json",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Game",
+      "icon": "icon.png"
+    },
+    "appImage": {
+      "artifactName": "LastEpochSaveEditor-${version}-${arch}.AppImage"
+    }
+  },
+  "dependencies": {
+    "express": "^4.22.2"
   },
   "devDependencies": {
-    "electron": "^33.0.0"
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
   }
 }
