@@ -1,31 +1,9 @@
-// Auto-detect system Electron
-function findElectron() {
-  const paths = [
-    "/usr/lib/electron42/electron",
-    "/usr/lib/electron41/electron",
-    "/usr/lib/electron40/electron",
-    "/usr/lib/electron39/electron",
-    "/usr/lib/electron38/electron",
-    "/usr/lib/electron37/electron",
-    "/usr/lib/electron36/electron",
-    "/usr/lib/electron35/electron",
-    "/usr/lib/electron34/electron",
-    "/usr/lib/electron33/electron",
-    "/usr/lib/electron/electron",
-  ];
-  for (const p of paths) {
-    if (require("fs").existsSync(p)) return p;
-  }
-  // Fall back to npx electron (npm-installed)
-  return null;
-}
+const { app, BrowserWindow } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 const http = require("http");
 
 let mainWindow = null;
-let serverProcess = null;
-let serverExited = false;
 const SERVER_URL = "http://127.0.0.1:17345";
 const SERVER_SCRIPT = path.join(__dirname, "server.js");
 
@@ -96,24 +74,12 @@ app.whenReady().then(() => {
     }
   });
 
-  // Start Node backend
-  serverProcess = spawn(process.execPath, [SERVER_SCRIPT], {
-    cwd: __dirname,
-    stdio: ["ignore", "pipe", "pipe"],
-    env: { ...process.env },
-  });
-
-  serverProcess.stderr.on("data", (data) => {
-    console.error(`[server] ${data}`);
-  });
-
-  serverProcess.on("exit", (code) => {
-    console.log(`Server process exited with code ${code}`);
-    serverExited = true;
-  });
-
-  // Consume stdout to prevent pipe buffer deadlock
-  serverProcess.stdout.on("data", () => {});
+  // Start Node backend — run in-process via require (works in AppImage too)
+  try {
+    require(SERVER_SCRIPT);
+  } catch (e) {
+    console.error("Failed to start backend:", e.message);
+  }
 
   // Wait for server, then create window
   waitForServer((err, health) => {
@@ -126,16 +92,8 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (serverProcess) {
-    serverProcess.kill();
-    serverProcess = null;
-  }
   app.quit();
 });
 
 app.on("before-quit", () => {
-  if (serverProcess) {
-    serverProcess.kill();
-    serverProcess = null;
-  }
 });
